@@ -1,16 +1,20 @@
 export interface PressRelease {
-  _id: string;
+  id: number;
   title: string;
   content: string;
   imageUrl?: string;
-  postedDate: string
-  createdBy: string
-  createdAt: string;
-  updatedAt: string;
+  postedDate: string;
+  createdBy?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PressReleasePayload {
   title: string;
   content: string;
   imageUrl?: string;
+}
+
+export interface PressReleaseStats {
+  totalPressReleases: number;
 }

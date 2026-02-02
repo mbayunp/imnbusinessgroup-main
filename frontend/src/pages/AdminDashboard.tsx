@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAdminAuth';
 import { getCareerStats, CareerStats } from '../services/careerService';
-import { getPressReleaseStats, PressReleaseStats } from '../services/pressReleaseService';
+import { getPressReleaseStats } from '../services/pressReleaseService';
+import { PressReleaseStats } from '../types/pressRelease';
 import { getAllContactMessages, deleteContactMessage, updateContactMessageStatus } from '../services/contactService';
 import { ContactMessage } from '../types/contact';
 import ConfirmationModal from '../components/ConfirmationModal';
@@ -22,11 +23,24 @@ const AdminDashboard: React.FC = () => {
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
   const [messageToDeleteId, setMessageToDeleteId] = useState<string | null>(null);
 
+  // --- LOGIC LOGOUT YANG DIPERBAIKI ---
+  // Fungsi ini memastikan logout terjadi + redirect dilakukan segera
+  const handleLogout = async () => {
+    await logoutUser(); // Tunggu proses hapus token/cookie selesai
+    navigate('/admin/login', { replace: true }); // Paksa pindah ke halaman login
+  };
+
+  // Redirect otomatis jika tidak terautentikasi (Fallback)
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/admin/login', { replace: true });
+    }
+  }, [authLoading, isAuthenticated, navigate]);
+
   // Fetch Data Logic
   const fetchContactMessages = async () => {
     try {
       const messages = await getAllContactMessages();
-      // Mapping data backend (status) ke frontend (read boolean)
       const formattedMessages = messages.map((msg: any) => ({
         ...msg,
         read: msg.status === 'read' || msg.read === true
@@ -56,7 +70,7 @@ const AdminDashboard: React.FC = () => {
     }
   }, [authLoading, isAuthenticated]);
 
-  // Handlers
+  // Handlers Lainnya
   const handleMarkAsRead = async (messageId: number) => {
     try {
       await updateContactMessageStatus(messageId.toString(), true);
@@ -118,43 +132,26 @@ const AdminDashboard: React.FC = () => {
     );
   }
 
-  // --- Access Denied State ---
+  // --- Access Denied State (Jika user null tapi loading false) ---
   if (!isAuthenticated || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100">
-        <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full text-center border border-slate-200">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
-                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-            </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-2">Akses Ditolak</h3>
-          <p className="text-slate-500 mb-6">Sesi Anda telah berakhir atau Anda tidak memiliki izin.</p>
-          <button
-            onClick={() => logoutUser()}
-            className="w-full rounded-lg bg-slate-900 px-4 py-2 text-white font-medium hover:bg-slate-800 transition-colors"
-          >
-            Kembali ke Login
-          </button>
-        </div>
-      </div>
-    );
+    return null; // useEffect di atas akan menangani redirect
   }
 
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
       {/* --- Sidebar Navigation --- */}
       <aside className="fixed inset-y-0 left-0 w-72 bg-slate-900 text-white shadow-2xl z-50 flex flex-col transition-all duration-300">
-        <div className="h-16 flex items-center justify-center border-b border-slate-800">
-          {/* PERBAIKAN: Logo diperkecil (text-xl) */}
-          <h1 className="text-xl font-bold tracking-wider text-blue-400">IMN<span className="text-white">ADMIN</span></h1>
+        <div className="h-16 flex items-center px-6 border-b border-slate-800">
+            <h1 className="text-lg font-extrabold tracking-tighter text-blue-400">
+            IMN <span className="text-white font-medium tracking-normal text-base">ADMIN</span>
+            </h1>
         </div>
 
         <nav className="flex-1 px-4 py-8 space-y-2">
             <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Menu Utama</p>
           
           <NavLink to="/admin/dashboard" className={({ isActive }) => `flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
             Dashboard
           </NavLink>
 
@@ -181,24 +178,31 @@ const AdminDashboard: React.FC = () => {
           )}
         </nav>
 
-        <div className="p-4 bg-slate-800 border-t border-slate-700">
-            <div className="flex items-center mb-3">
-                <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg">
-                    {user?.username.charAt(0).toUpperCase()}
-                </div>
-                <div className="ml-3">
-                    <p className="text-sm font-medium text-white">{user?.username}</p>
-                    <p className="text-xs text-slate-400 capitalize">{user?.role}</p>
-                </div>
+       <div className="p-4 bg-slate-800 border-t border-slate-700">
+        <div className="flex items-center mb-4">
+            <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold uppercase shadow-inner">
+                {user?.username.charAt(0)}
             </div>
-            <button
-                onClick={logoutUser}
-                className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-xs font-medium text-slate-200 bg-slate-700 hover:bg-red-600 hover:text-white transition-colors duration-200"
-            >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                Keluar
-            </button>
+            <div className="ml-3 overflow-hidden">
+                <p className="text-sm font-bold text-white truncate w-32">{user?.username}</p>
+                <p className="text-xs text-slate-400 capitalize">{user?.role}</p>
+            </div>
         </div>
+        
+        {/* PERBAIKAN: Menggunakan handleLogout */}
+        <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center px-4 py-2.5
+                      bg-red-600/10 border border-red-600/20
+                      rounded-xl text-xs font-bold text-red-500
+                      hover:bg-red-600 hover:text-white transition-all duration-200"
+        >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Keluar Sistem
+        </button>
+    </div>
       </aside>
 
       {/* --- Main Content Area --- */}
@@ -220,9 +224,14 @@ const AdminDashboard: React.FC = () => {
             </div>
         </header>
 
+        {/* ... (Sisa kode Stats Grid dan Modal Anda sudah benar, tidak perlu diubah) ... */}
+        {/* Kode di bawah ini sama persis dengan yang Anda berikan, hanya dipotong agar tidak kepanjangan di sini. 
+            Pastikan Anda menyalin seluruh komponen dari kode Anda sebelumnya untuk bagian ini. */}
+        
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            {/* ... Cards ... */}
+             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="text-sm font-medium text-slate-500">Total Lowongan</p>
@@ -287,6 +296,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Quick Actions */}
             <div className="lg:col-span-1 space-y-6">
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                     <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
@@ -317,6 +327,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
             </div>
 
+            {/* Messages */}
             <div className="lg:col-span-2">
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-full">
                     <div className="p-6 border-b border-slate-100 flex justify-between items-center">
@@ -343,13 +354,11 @@ const AdminDashboard: React.FC = () => {
                                     <li key={message.id} className={`p-4 hover:bg-slate-50 transition-colors cursor-pointer group ${!message.read ? 'bg-blue-50/30' : ''}`}>
                                         <div className="flex items-start justify-between">
                                             <div className="flex items-start flex-1 min-w-0" onClick={() => handleViewDetail(message)}>
-                                                {/* PERBAIKAN: Menggunakan name.charAt(0) */}
                                                 <div className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold mr-3 ${!message.read ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-500'}`}>
                                                     {message.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex items-center justify-between mb-1">
-                                                        {/* PERBAIKAN: Menggunakan message.name */}
                                                         <p className={`text-sm truncate mr-2 ${!message.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
                                                             {message.name}
                                                             {!message.read && <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full"></span>}
@@ -396,7 +405,6 @@ const AdminDashboard: React.FC = () => {
             </div>
         </div>
 
-        {/* --- Modals --- */}
         {isDetailModalOpen && selectedMessage && (
           <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
             <div className="bg-white rounded-2xl p-0 max-w-lg w-full shadow-2xl overflow-hidden animate-fade-in-up">
@@ -409,12 +417,10 @@ const AdminDashboard: React.FC = () => {
 
               <div className="p-6">
                 <div className="flex items-center mb-6">
-                     {/* PERBAIKAN: Menggunakan name */}
                      <div className="h-12 w-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg mr-4">
                         {selectedMessage.name.charAt(0).toUpperCase()}
                      </div>
                      <div>
-                         {/* PERBAIKAN: Menggunakan name */}
                          <h4 className="text-slate-900 font-bold text-lg">{selectedMessage.name}</h4>
                          <p className="text-blue-600 text-sm">{selectedMessage.email}</p>
                      </div>

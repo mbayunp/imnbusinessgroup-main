@@ -14,15 +14,13 @@ import authRoutes from './routes/authRoutes.js';
 import careerRoutes from './routes/careerRoutes.js';
 import pressReleaseRoutes from './routes/pressReleaseRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
-import contactRoutes from './routes/contactRoutes.js'; // <--- PENTING: Route Contact
+import contactRoutes from './routes/contactRoutes.js';
 
 // Import Middleware
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
-import { protect } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
-// --- DEFINISI __DIRNAME (Wajib untuk ES Modules) ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -40,19 +38,15 @@ app.use(cookieParser());
 // --- DATABASE CONNECTION & SYNC ---
 const startServer = async () => {
   try {
-    // 1. Tes Koneksi
     await sequelize.authenticate();
     console.log('✅ Database connected');
 
-    // 2. Inisialisasi Model
     initModels(sequelize);
 
-    // 3. SYNC DATABASE
-    // alter: true akan memperbarui tabel jika ada kolom baru (seperti di Contact)
+    // alter: true memperbarui skema tanpa menghapus data yang sudah ada
     await sequelize.sync({ alter: true }); 
-    console.log('✅ Database Synced (Tabel diperbarui)');
+    console.log('✅ Database Synced');
 
-    // 4. Jalankan Server
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`🚀 Server berjalan di port ${PORT}`);
@@ -64,26 +58,29 @@ const startServer = async () => {
 };
 
 // --- ROUTES ---
+
+// Folder Static untuk Gambar (Pindahkan ke atas agar bisa diakses publik)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.get('/', (req, res) => {
   res.send('🎉 API is running...');
 });
 
 // Route Utama
 app.use('/api/auth', authRoutes);
-app.use('/api/careers', protect, careerRoutes);         // Ada protect (harus login)
-app.use('/api/press-releases', protect, pressReleaseRoutes); // Ada protect
+
+/** * PERBAIKAN PENTING: 
+ * Hapus middleware 'protect' dari sini. 
+ * Proteksi admin/HR diatur di dalam file router masing-masing (careerRoutes.js & pressReleaseRoutes.js)
+ * agar fungsi GET (view publik) tetap bisa diakses tanpa login.
+ */
+app.use('/api/careers', careerRoutes);             //
+app.use('/api/press-releases', pressReleaseRoutes); //
 app.use('/api/upload', uploadRoutes);
-
-// Route Contact (BARU DITAMBAHKAN)
-// Perhatikan: Di dalam contactRoutes.js nanti ada yang public (POST) dan admin (GET/DELETE)
 app.use('/api/contact', contactRoutes); 
-
-// Folder Static untuk Gambar
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Error Middleware (Harus paling bawah)
 app.use(notFound);
 app.use(errorHandler);
 
-// Jalankan Server
 startServer();

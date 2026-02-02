@@ -4,7 +4,8 @@ interface RevealOnScrollProps {
   children: React.ReactNode;
   delay?: number;
   threshold?: number;
-  animationType?: 'slide-up' | 'fade-in';
+  // Menambahkan slide-left dan slide-right ke dalam tipe data
+  animationType?: 'slide-up' | 'fade-in' | 'slide-left' | 'slide-right';
 }
 
 const RevealOnScroll: React.FC<RevealOnScrollProps> = ({ 
@@ -21,7 +22,10 @@ const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
       (entries) => {
         if (entries[0].isIntersecting) {
           setIsVisible(true);
-          observer.unobserve(domRef.current as Element);
+          // Berhenti mengamati setelah elemen terlihat untuk efisiensi
+          if (domRef.current) {
+            observer.unobserve(domRef.current);
+          }
         }
       },
       {
@@ -41,19 +45,34 @@ const RevealOnScroll: React.FC<RevealOnScrollProps> = ({
     };
   }, [threshold]);
 
-  const animationClasses = {
-    'slide-up': `transform transition-all duration-700 ${
-      isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-    }`,
-    'fade-in': `transition-all duration-700 ${
-      isVisible ? 'opacity-100' : 'opacity-0'
-    }`,
+  // Mendefinisikan class animasi berdasarkan tipe yang dipilih
+  const getAnimationClasses = () => {
+    const base = "transform transition-all duration-1000 ease-out";
+    
+    switch (animationType) {
+      case 'slide-up':
+        return `${base} ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`;
+      
+      case 'slide-left':
+        // Muncul dari arah kanan ke kiri
+        return `${base} ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'}`;
+      
+      case 'slide-right':
+        // Muncul dari arah kiri ke kanan
+        return `${base} ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-12 opacity-0'}`;
+      
+      case 'fade-in':
+        return `transition-opacity duration-1000 ease-out ${isVisible ? 'opacity-100' : 'opacity-0'}`;
+      
+      default:
+        return base;
+    }
   };
 
   return (
     <div
       ref={domRef}
-      className={`${animationClasses[animationType]}`}
+      className={getAnimationClasses()}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}

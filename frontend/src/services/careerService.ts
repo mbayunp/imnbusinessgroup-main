@@ -2,15 +2,18 @@ import api from './api';
 import { Career, CareerPayload } from '../types/career';
 import axios, { AxiosError } from 'axios';
 
+/**
+ * Catatan: Pastikan di backend, endpoint GET /careers dan GET /careers/:id
+ * TIDAK dibungkus oleh middleware auth/protect agar bisa diakses publik.
+ */
+
 const uploadImage = async (file: File): Promise<string> => {
   try {
     const formData = new FormData();
     formData.append('image', file);
 
     const response = await api.post<{ imageUrl: string }>('/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data.imageUrl;
   } catch (error: unknown) {
@@ -23,13 +26,10 @@ const uploadImage = async (file: File): Promise<string> => {
 
 const getAllCareers = async (): Promise<Career[]> => {
   try {
+    // API ini akan tetap mengirim token jika ada (lewat interceptor), 
+    // tapi backend harus mengizinkan jika token kosong (null).
     const response = await api.get<Career[]>('/careers');
-    if (Array.isArray(response.data)) {
-      return response.data;
-    } else {
-      console.warn('Backend returned non-array data for /careers:', response.data);
-      return []; 
-    }
+    return Array.isArray(response.data) ? response.data : [];
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
       throw (error.response?.data as { message?: string })?.message || error.message;

@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { getAllCareers } from '../services/careerService';
 import { Career } from '../types/career';
 import { AxiosError } from 'axios';
-
 import RevealOnScroll from '../components/RevealOnScroll';
+import { FiBriefcase, FiCalendar, FiArrowRight, FiX, FiMapPin } from 'react-icons/fi';
 
 const Careers: React.FC = () => {
   const [careers, setCareers] = useState<Career[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
 
+  const IMAGE_BASE_URL = 'https://imnbusinessgroup.co.id';
 
   useEffect(() => {
     const fetchCareers = async () => {
@@ -22,9 +22,12 @@ const Careers: React.FC = () => {
       } catch (err: unknown) {
         let errorMessage = 'Gagal mengambil data lowongan.';
         if (err instanceof AxiosError) {
-          errorMessage = err.response?.data?.message || err.message || errorMessage;
-        } else {
-          errorMessage = (err as Error).message || errorMessage;
+          // Jika masih 401, berikan pesan instruksi untuk cek backend
+          if (err.response?.status === 401) {
+            errorMessage = "Akses Publik belum diizinkan oleh server (401).";
+          } else {
+            errorMessage = err.response?.data?.message || err.message || errorMessage;
+          }
         }
         setError(errorMessage);
         console.error('Error fetching careers:', err);
@@ -32,7 +35,6 @@ const Careers: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchCareers();
   }, []);
 
@@ -46,142 +48,130 @@ const Careers: React.FC = () => {
     setIsDetailModalOpen(false);
   };
 
-
   if (loading) {
     return (
-      <div className="flex min-h-[calc(100vh-80px-80px)] items-center justify-center bg-gray-50 pt-20">
-        <div className="text-lg font-medium text-gray-700">Memuat lowongan...</div>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="flex flex-col items-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+          <p className="mt-4 font-black text-slate-400 uppercase tracking-widest text-[10px]">Memuat Peluang Karir...</p>
+        </div>
       </div>
     );
   }
-
-  if (error) {
-    return (
-      <div className="flex min-h-[calc(100vh-80px-80px)] items-center justify-center bg-gray-50 pt-20">
-        <div className="rounded-md bg-red-100 p-4 text-red-700">Error: {error}</div>
-      </div>
-    );
-  }
-
-  const IMAGE_BASE_URL = 'https://imnbusinessgroup.co.id';
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-gray-800 overflow-x-hidden">
-      <main className="flex-grow pt-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#FDFDFD] font-sans selection:bg-blue-100 overflow-x-hidden">
+      <main className="max-w-7xl mx-auto pt-32 pb-24 px-5 md:px-6">
+        
+        {/* Header Section */}
+        <div className="text-center mb-20">
+          <RevealOnScroll animationType="slide-up">
+            <span className="text-blue-600 font-black uppercase tracking-[0.3em] text-[10px] md:text-xs">Career Path</span>
+            <h1 className="text-4xl md:text-6xl font-black text-slate-900 mt-4 tracking-tighter italic uppercase">
+              Join Our <span className="text-blue-600">Dream Team</span>
+            </h1>
+            <div className="w-16 h-1.5 bg-blue-600 mx-auto mt-6 rounded-full"></div>
+          </RevealOnScroll>
+        </div>
 
-          {/* Header Section*/}
-          <div className="py-12 text-center mb-16">
-            <RevealOnScroll delay={0} animationType="slide-up">
-              <h1 className="mb-8 text-center text-4xl sm:text-5xl font-extrabold text-gray-900">Lowongan Karir</h1>
-            </RevealOnScroll>
-            <RevealOnScroll delay={0} animationType="slide-up">
-              <p className="mb-12 text-center text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto">
-                Temukan peluang karir menarik di IMN Business Group. Bergabunglah dengan tim kami!
-              </p>
-            </RevealOnScroll>
+        {error ? (
+          <div className="max-w-2xl mx-auto p-8 bg-red-50 border border-red-100 rounded-[2rem] text-red-700 text-center font-bold text-sm">
+            {error}
           </div>
-
-          {careers.length === 0 ? (
-            <div className="text-center text-xl text-gray-600 mt-10 p-8 bg-white rounded-lg shadow-md max-w-7xl mx-auto">
-              Belum ada lowongan kerja tersedia saat ini.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
-              {careers.map((career, index) => (
-                // Perbaikan: Menggunakan career.id sebagai key
-                <RevealOnScroll key={career.id} delay={index * 100} animationType="slide-up">
-                  <div
-                    className="rounded-xl bg-white shadow-xl transition-transform duration-300 hover:scale-105 overflow-hidden flex flex-col cursor-pointer"
-                    onClick={() => openDetailModal(career)}
-                  >
-                    {career.imageUrl && (
-                      <div
-                        className="w-full h-64 overflow-hidden rounded-t-xl bg-gray-100"
-                      >
-                        <img
-                          src={`${IMAGE_BASE_URL}${career.imageUrl}`}
-                          alt={career.title}
-                          className="w-full h-full object-cover object-center"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = 'https://placehold.co/600x300/cccccc/000000?text=Gambar+Tidak+Ditemukan';
-                            console.error('Gagal memuat gambar:', `${IMAGE_BASE_URL}${career.imageUrl}`);
-                          }}
-                        />
-                      </div>
-                    )}
-                    <div className="p-6 flex-1 flex flex-col">
-                      <h2 className="mb-3 text-xl sm:text-2xl font-bold text-gray-900 leading-tight">{career.title}</h2>
-                      <p className="mb-4 text-gray-700 text-sm sm:text-base flex-1">
-                        {career.description.substring(0, 180)}{career.description.length > 180 ? '...' : ''}
-                      </p>
-                      <div className="mt-auto flex justify-between items-center text-sm text-gray-500">
-                        <span>Tanggal Posting: {new Date(career.postedDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                        <a
-                          href={career.gFormLink} // Ini adalah link eksternal Google Form, tidak berubah
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 font-semibold transition-colors text-sm sm:text-base"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Lamar Sekarang &rarr;
-                        </a>
-                      </div>
+        ) : careers.length === 0 ? (
+          <div className="text-center p-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
+            <FiBriefcase className="mx-auto text-slate-300 mb-6" size={56} />
+            <p className="text-lg font-black text-slate-400 uppercase tracking-[0.2em]">Belum ada lowongan tersedia</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {careers.map((career, index) => (
+              <RevealOnScroll key={career.id} delay={index * 100} animationType="slide-up">
+                <div
+                  className="group bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col h-full cursor-pointer"
+                  onClick={() => openDetailModal(career)}
+                >
+                  <div className="relative h-60 overflow-hidden bg-slate-100">
+                    <img
+                      src={career.imageUrl ? `${IMAGE_BASE_URL}${career.imageUrl}` : 'https://placehold.co/600x400?text=IMN+Career'}
+                      alt={career.title}
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-[10px] font-black uppercase tracking-widest rounded-lg text-blue-600 shadow-sm">
+                        Hiring Now
+                      </span>
                     </div>
                   </div>
-                </RevealOnScroll>
-                ))}
-            </div>
-            )}
-        </div>
+
+                  <div className="p-8 flex flex-col flex-grow">
+                    <h2 className="text-2xl font-black text-slate-800 mb-4 tracking-tight group-hover:text-blue-600 transition-colors uppercase italic">
+                      {career.title}
+                    </h2>
+                    <p className="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3 font-medium">
+                      {career.description}
+                    </p>
+                    
+                    <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between text-slate-400">
+                      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                        <FiCalendar className="text-blue-500" />
+                        {new Date(career.postedDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </div>
+                      <span className="text-blue-600 font-black text-[10px] uppercase tracking-tighter flex items-center group-hover:gap-2 transition-all">
+                        VIEW DETAIL <FiArrowRight />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </RevealOnScroll>
+            ))}
+          </div>
+        )}
       </main>
 
-      {/* Modal Detail*/}
+      {/* --- Modal Detail --- */}
       {isDetailModalOpen && selectedCareer && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
-          onClick={closeDetailModal}
-        >
-          <div
-            className="relative bg-white rounded-lg max-w-full md:max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-lg"
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Tombol Tutup */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={closeDetailModal}></div>
+          
+          <div className="relative bg-white rounded-[2.5rem] md:rounded-[3.5rem] max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl animate-in fade-in zoom-in duration-300">
             <button
               onClick={closeDetailModal}
-              className="absolute top-2 right-2 text-gray-600 bg-white rounded-full p-2 hover:bg-gray-200 z-10"
-              aria-label="Tutup"
+              className="absolute top-4 right-4 z-20 p-2 bg-white/80 backdrop-blur-sm rounded-full text-slate-900 hover:text-red-600 transition-all shadow-lg"
             >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              <FiX size={24} />
             </button>
 
-            {/* Bagian Gambar*/}
-            {selectedCareer.imageUrl && (
-              <div className="md:w-1/2 w-full flex-shrink-0">
-                <img
-                  src={`${IMAGE_BASE_URL}${selectedCareer.imageUrl}`}
-                  alt={selectedCareer.title}
-                  className="w-full h-full object-cover rounded-tl-lg md:rounded-bl-lg md:rounded-tr-none rounded-br-none"
-                />
-              </div>
-            )}
+            {/* Image Section */}
+            <div className="md:w-5/12 bg-slate-200 shrink-0 h-64 md:h-auto overflow-hidden">
+              <img
+                src={selectedCareer.imageUrl ? `${IMAGE_BASE_URL}${selectedCareer.imageUrl}` : 'https://placehold.co/600x400?text=IMN+Career'}
+                alt={selectedCareer.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
 
-            {/* Bagian Deskripsi/Detail*/}
-            <div className="flex-1 p-6 overflow-y-auto">
-              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 mb-3">{selectedCareer.title}</h3>
-              <p className="text-sm sm:text-base text-gray-700 mb-4">{selectedCareer.description}</p>
-              <p className="text-xs sm:text-sm text-gray-500 mb-4">
-                Tanggal Posting: {new Date(selectedCareer.postedDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
-              <a
-                href={selectedCareer.gFormLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-2 rounded-md bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition-colors text-sm sm:text-base"
-              >
-                Lamar Sekarang
-              </a>
+            {/* Description Section */}
+            <div className="flex-1 p-8 md:p-14 overflow-y-auto">
+              <span className="text-blue-600 font-black uppercase tracking-widest text-[10px] md:text-xs">Job Details</span>
+              <h3 className="text-3xl md:text-5xl font-black text-slate-900 mt-2 mb-8 tracking-tighter uppercase italic leading-tight">
+                {selectedCareer.title}
+              </h3>
+              
+              <div className="mb-10 text-slate-600 leading-relaxed font-medium text-sm md:text-base whitespace-pre-line">
+                {selectedCareer.description}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a
+                  href={selectedCareer.gFormLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center px-10 py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95"
+                >
+                  Apply Now <FiArrowRight className="ml-3" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

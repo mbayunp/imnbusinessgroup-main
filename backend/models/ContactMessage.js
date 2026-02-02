@@ -21,6 +21,11 @@ export const initContactModel = (sequelize) => {
         isEmail: true,
       }
     },
+    // TAMBAHKAN KOLOM PHONE DI SINI
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: true, // Boleh kosong jika user tidak mengisi
+    },
     subject: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -29,7 +34,6 @@ export const initContactModel = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    // Status pesan (misal: 'unread', 'read') - Opsional tapi berguna
     status: {
       type: DataTypes.STRING,
       defaultValue: 'unread'
@@ -43,3 +47,5 @@ export const initContactModel = (sequelize) => {
 
   return ContactMessage;
 };
+
+export { ContactMessage };

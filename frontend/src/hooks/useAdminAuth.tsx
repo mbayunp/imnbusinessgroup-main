@@ -1,7 +1,6 @@
-// src/hooks/useAdminAuth.ts
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import Cookies from 'js-cookie';
-import { getProfile, logout as authLogout } from '../services/authService'; // Import getProfile dan logout
+import { getProfile, logout as authLogout } from '../services/authService';
 
 interface UserProfile {
   id: number;
@@ -9,11 +8,12 @@ interface UserProfile {
   role: string;
 }
 
+// 1. Definisi Tipe Context
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
   loginUser: () => Promise<void>;
-  logoutUser: () => void;
+  logoutUser: () => Promise<void>; // Pastikan ini ada!
   isAuthenticated: boolean;
   isAdmin: boolean;
   isHR: boolean;
@@ -26,49 +26,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
-    const token = Cookies.get('jwtToken');
-    const storedUserId = Cookies.get('userId');
-    const storedUserRole = Cookies.get('userRole');
-
-    if (token && storedUserId && storedUserRole) {
-      try {
-        const currentUser = await getProfile(); // Memanggil API /auth/me
-        // Pastikan ID dan role dari API cocok dengan cookie
-        if (currentUser.id.toString() === storedUserId && currentUser.role === storedUserRole) {
-          setUser(currentUser);
-        } else {
-          // Jika token valid tapi data user tidak cocok, mungkin token kadaluarsa atau user berubah di DB
-          authLogout(); // Logout paksa dari cookie
-          setUser(null);
-        }
-      } catch (error) {
-        // Jika getProfile gagal (misal 401 Unauthorized), itu berarti token tidak valid
-        console.error('Failed to fetch user profile, likely no active session or invalid token:', error);
-        authLogout(); // Hapus cookie dan logout user
-        setUser(null);
-      }
-    } else {
-      // Tidak ada token di cookie, atau tidak lengkap
+    try {
+      const currentUser = await getProfile();
+      setUser(currentUser);
+    } catch (error) {
       setUser(null);
+      // Bersihkan cookie jika sesi tidak valid
+      Cookies.remove('jwtToken');
+      Cookies.remove('userId');
+      Cookies.remove('userRole');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
-    fetchUser(); // Panggil saat komponen mount
+    fetchUser();
   }, [fetchUser]);
 
   const loginUser = useCallback(async () => {
     setLoading(true);
-    // Setelah login/register, token dan user ID/role sudah di cookie
-    // Panggil fetchUser untuk memuat ulang status user dari cookie/API
     await fetchUser();
   }, [fetchUser]);
 
-  const logoutUser = useCallback(() => {
-    authLogout(); // Panggil fungsi logout dari authService
-    setUser(null);
-    setLoading(false);
+  // 2. Fungsi Logout
+  const logoutUser = useCallback(async () => {
+    try {
+      await authLogout(); // Panggil API logout
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      // Hapus state dan cookie di frontend
+      setUser(null);
+      setLoading(false);
+      Cookies.remove('jwtToken');
+      Cookies.remove('userId');
+      Cookies.remove('userRole');
+    }
   }, []);
 
   const isAuthenticated = !!user;
@@ -76,7 +70,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isHR = user?.role === 'hr';
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginUser, logoutUser, isAuthenticated, isAdmin, isHR }}>
+    // 3. BAGIAN KRUSIAL: Masukkan logoutUser ke sini!
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      loginUser, 
+      logoutUser, // <--- WAJIB ADA. Jika ini hilang, dashboard akan error.
+      isAuthenticated, 
+      isAdmin, 
+      isHR 
+    }}>
       {children}
     </AuthContext.Provider>
   );

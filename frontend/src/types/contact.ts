@@ -8,16 +8,14 @@ export interface ContactMessagePayload {
 }
 export interface ContactMessage {
   id: number;
-  name: string;      // Backend mengirim 'name', bukan firstName/lastName
+  name: string;
   email: string;
   subject: string;
   message: string;
-  status: string;    // 'read' atau 'unread'
+  status: string;
   createdAt: string;
-  phone?: string;    // Opsional
-  
-  // Property tambahan untuk UI (opsional)
-  read?: boolean; 
+  phone?: string;
+    read?: boolean; 
 }
 
 export interface ContactMessageResponse {

@@ -1,14 +1,15 @@
 // backend/controllers/contactController.js
 import { ContactMessage } from '../models/index.js';
 
-// 1. Kirim Pesan (Public - Tidak butuh login)
+// 1. Kirim Pesan (Public)
 export const createContactMessage = async (req, res) => {
   try {
-    const { name, email, subject, message } = req.body;
+    const { firstName, lastName, email, phone, subject, message } = req.body;
 
     const newMessage = await ContactMessage.create({
-      name,
+      name: `${firstName} ${lastName || ''}`.trim(),
       email,
+      phone,
       subject,
       message,
       status: 'unread'
@@ -21,20 +22,19 @@ export const createContactMessage = async (req, res) => {
   }
 };
 
-// 2. Baca Semua Pesan (Admin Only)
+// 2. Baca Pesan (Admin)
 export const getContactMessages = async (req, res) => {
   try {
     const messages = await ContactMessage.findAll({
-      order: [['createdAt', 'DESC']] // Pesan terbaru di atas
+      order: [['createdAt', 'DESC']]
     });
     res.json(messages);
   } catch (error) {
-    console.error("Error fetching contact messages:", error);
-    res.status(500).json({ message: 'Gagal mengambil pesan kontak.' });
+    res.status(500).json({ message: 'Gagal mengambil pesan.' });
   }
 };
 
-// 3. Hapus Pesan (Admin Only)
+// 3. HAPUS PESAN (INI YANG TADI ERROR/HILANG)
 export const deleteContactMessage = async (req, res) => {
   try {
     const { id } = req.params;

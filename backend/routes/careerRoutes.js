@@ -13,13 +13,12 @@ import {
 
 const router = express.Router();
 
-router.get('/stats', protect, authorizeRoles(['admin', 'hr']), getCareerStats);
-
 router.get('/', getAllCareers);
-router.get('/:id', getCareerById);
+router.get('/detail/:id', getCareerById);
+router.get('/stats', protect, authorizeRoles('admin', 'hr'), getCareerStats);
 
-router.post('/', protect, authorizeRoles(['admin', 'hr']), createCareer); 
-router.put('/:id', protect, authorizeRoles(['admin', 'hr']), updateCareer); 
-router.delete('/:id', protect, authorizeRoles(['admin', 'hr']), deleteCareer);
+router.post('/', protect, authorizeRoles('admin', 'hr'), createCareer); 
+router.put('/:id', protect, authorizeRoles('admin', 'hr'), updateCareer); 
+router.delete('/:id', protect, authorizeRoles('admin', 'hr'), deleteCareer);
 
 export default router;

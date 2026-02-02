@@ -3,7 +3,6 @@
 // 1. FIX IMPORT: Ambil User dari index.js, bukan langsung dari file User.js
 import { User } from '../models/index.js';
 import jwt from 'jsonwebtoken';
-// bcrypt tidak perlu di-import di sini jika validasi password sudah ada di method User (matchPassword)
 
 // Fungsi bantu buat cookie & token
 const generateTokenAndSetCookie = (res, id, role) => {
