@@ -1,67 +1,81 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FiMail, FiPhone, FiMapPin, FiInstagram, FiFacebook, FiLinkedin } from 'react-icons/fi';
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="bg-white text-blue-600 py-12">
-      <div className="container mx-auto px-6">
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-
-          <div className="col-span-1 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
-
-            <img src="/logo.png" alt="IMN Business Group Logo" className="h-10 mb-4" /> 
-
-            <p className="text-sm">Jl. Cipondoh Girang, RT.06/RW.12</p>
-            <p className="text-sm">Kel Cinunuk, Kec. Cileunyi</p>
-            <p className="text-sm">Kabupaten Bandung, Jawa Barat 40624</p>
-
-            <p className="text-sm mt-4">Email: info@imnbusinessgroup.com</p>
-            <p className="text-sm">Phone: +62 21 1234 5678</p>
+    <footer className="bg-slate-900 text-slate-300 pt-20 pb-10 font-sans">
+      <div className="max-w-7xl mx-auto px-6">
+        
+        {/* Top Section */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+          
+          {/* Brand Column */}
+          <div className="md:col-span-4 space-y-6">
+            <img src="/logo.png" alt="IMN Business Group Logo" className="h-12 brightness-0 invert" /> 
+            <p className="text-sm leading-relaxed max-w-sm text-slate-400">
+              IMN Business Group berkomitmen untuk mendorong pertumbuhan ekonomi nasional melalui inovasi berkelanjutan di berbagai sektor industri.
+            </p>
+            <div className="flex space-x-4">
+              <a href="#" className="p-2 bg-slate-800/50 rounded-lg hover:bg-blue-600 transition-all"><FiInstagram /></a>
+              <a href="#" className="p-2 bg-slate-800/50 rounded-lg hover:bg-blue-600 transition-all"><FiFacebook /></a>
+              <a href="#" className="p-2 bg-slate-800/50 rounded-lg hover:bg-blue-600 transition-all"><FiLinkedin /></a>
+            </div>
           </div>
 
-          <div className="col-span-1 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
-            <h3 className="font-semibold text-lg text-blue-600 mb-4">About Us</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/tentang" className="hover:text-white transition-colors">Tentang Kami</Link></li>
-              <li><Link to="/kegiatan" className="hover:text-white transition-colors">Kegiatan Kami</Link></li> {/* Mengarahkan ke Kegiatan Kami */}
-              <li><Link to="/careers" className="hover:text-white transition-colors">Karir</Link></li>
+          {/* About Us Column */}
+          <div className="md:col-span-2">
+            <h3 className="text-white font-black uppercase tracking-widest text-xs mb-6">Perusahaan</h3>
+            <ul className="space-y-4 text-sm font-medium">
+              <li><Link to="/tentang" className="hover:text-blue-400 transition-colors">Tentang Kami</Link></li>
+              <li><Link to="/kegiatan" className="hover:text-blue-400 transition-colors">Kegiatan Kami</Link></li>
+              <li><Link to="/careers" className="hover:text-blue-400 transition-colors">Karir</Link></li>
+              <li><Link to="/press-releases" className="hover:text-blue-400 transition-colors">Rilis Pers</Link></li>
             </ul>
           </div>
 
-
-          <div className="col-span-1 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
-            <h3 className="font-semibold text-lg text-blue-600 mb-4">Our Services</h3>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">HR Consultant</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">IT Solutions</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Financial Consulting</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Design & Printing</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Aqiqah & Qurban</a></li>
+          {/* Services Column */}
+          <div className="md:col-span-3">
+            <h3 className="text-white font-black uppercase tracking-widest text-xs mb-6">Unit Bisnis</h3>
+            <ul className="space-y-4 text-sm font-medium">
+              <li className="hover:text-blue-400 cursor-default transition-colors">Agrobisnis & Peternakan</li>
+              <li className="hover:text-blue-400 cursor-default transition-colors">Jasa Pengadaan Barang</li>
+              <li className="hover:text-blue-400 cursor-default transition-colors">Manajemen Aqiqah</li>
+              <li className="hover:text-blue-400 cursor-default transition-colors">IT & Creative Solutions</li>
             </ul>
           </div>
 
-
-          <div className="col-span-1 md:col-span-1 flex flex-col items-center md:items-start text-center md:text-left">
-            <h3 className="font-semibold text-lg text-white mb-4">Legal & Contact</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/kebijakan-privasi" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
-              <li><Link to="/press-releases" className="hover:text-white transition-colors">Press Releases</Link></li> {/* Berita Pers */}
+          {/* Contact Column */}
+          <div className="md:col-span-3">
+            <h3 className="text-white font-black uppercase tracking-widest text-xs mb-6">Kontak</h3>
+            <ul className="space-y-4 text-sm font-medium">
+              <li className="flex items-start gap-3">
+                <FiMapPin className="text-blue-500 mt-1 shrink-0" />
+                <span>Jl. Cipondoh Girang, RT.06/RW.12, Cinunuk, Cileunyi, Bandung 40624</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <FiPhone className="text-blue-500 shrink-0" />
+                <span>+62 21 1234 5678</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <FiMail className="text-blue-500 shrink-0" />
+                <span>info@imnbusinessgroup.com</span>
+              </li>
             </ul>
           </div>
         </div>
 
-
-        <div className="border-t border-white mt-8 pt-8 flex flex-col md:flex-row justify-between items-center text-sm">
-
-          <p className="text-white text-center md:text-left mb-4 md:mb-0">
-            © 2025 IMN Business Group. All rights reserved.
+        {/* Bottom Section - GARIS DIHAPUS */}
+        <div className="mt-20 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-xs font-bold uppercase tracking-tighter text-slate-500">
+            © {currentYear} <span className="text-slate-400">IMN Business Group</span>. Seluruh Hak Cipta Dilindungi.
           </p>
-
-          <div className="flex space-x-6">
-            <Link to="/kebijakan-privasi" className="text-white hover:text-white transition-colors">Kebijakan Privasi</Link>
-            <Link to="/contact" className="text-white hover:text-white transition-colors">Contact</Link>
+          
+          <div className="flex gap-8 text-[10px] font-black uppercase tracking-[0.2em]">
+            <Link to="/kebijakan-privasi" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/contact" className="hover:text-white transition-colors">Support</Link>
           </div>
         </div>
       </div>

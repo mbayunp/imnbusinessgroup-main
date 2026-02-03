@@ -5,7 +5,7 @@ import { Career } from '../types/career';
 import { AxiosError } from 'axios';
 import { 
   FiPlus, FiEdit2, FiTrash2, FiArrowLeft, FiExternalLink, 
-  FiBriefcase, FiCalendar, FiAlertCircle, FiCheckCircle, FiLoader 
+  FiBriefcase, FiCalendar, FiAlertCircle, FiCheckCircle, FiLoader, FiImage 
 } from 'react-icons/fi';
 
 const AdminCareerListPage: React.FC = () => {
@@ -155,6 +155,7 @@ const AdminCareerListPage: React.FC = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-slate-50/50 text-slate-400 text-[11px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
+                    <th className="px-8 py-5">Visual</th> {/* KOLOM BARU */}
                     <th className="px-8 py-5">Informasi Posisi</th>
                     <th className="px-8 py-5">Tanggal Posting</th>
                     <th className="px-8 py-5 text-center">Status</th>
@@ -164,14 +165,36 @@ const AdminCareerListPage: React.FC = () => {
                 <tbody className="divide-y divide-slate-100">
                   {careers.map((career) => (
                     <tr key={career.id} className="group hover:bg-blue-50/30 transition-all">
+                      
+                      {/* --- KOLOM GAMBAR (BARU) --- */}
+                      <td className="px-8 py-6 w-32">
+                        <div className="w-20 h-20 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm relative group-hover:scale-105 transition-transform duration-300">
+                          {career.imageUrl ? (
+                            <img 
+                              src={career.imageUrl} 
+                              alt={career.title} 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Fallback jika gambar rusak/link mati
+                                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=No+Image';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-300">
+                              <FiImage size={28} />
+                            </div>
+                          )}
+                        </div>
+                      </td>
+
                       <td className="px-8 py-6">
                         <div className="font-extrabold text-slate-700 text-lg group-hover:text-blue-700 transition-colors">{career.title}</div>
-                        <div className="flex items-center text-xs mt-1 font-medium">
+                        <div className="flex items-center text-xs mt-2 font-medium">
                           <a 
                             href={career.gFormLink} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-blue-500 flex items-center hover:text-blue-700"
+                            className="text-blue-500 flex items-center hover:text-blue-700 px-3 py-1 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                           >
                             <FiExternalLink className="mr-1" /> Tinjau Google Form
                           </a>

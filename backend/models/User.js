@@ -17,12 +17,10 @@ export const initUserModel = (sequelize) => {
     username: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
     email: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique: true,
       validate: {
         isEmail: true,
       },
@@ -41,10 +39,26 @@ export const initUserModel = (sequelize) => {
     modelName: 'User',
     tableName: 'users',
     timestamps: true,
+    
+    indexes: [
+      {
+        unique: true,
+        fields: ['username'],
+        name: 'users_username_unique_idx' // Nama ini tidak akan berubah-ubah
+      },
+      {
+        unique: true,
+        fields: ['email'],
+        name: 'users_email_unique_idx' // Nama ini tidak akan berubah-ubah
+      }
+    ],
+
     hooks: {
       beforeCreate: async (user) => {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(user.password, salt);
+        if (user.password) {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
       },
       beforeUpdate: async (user) => {
         if (user.changed('password')) {

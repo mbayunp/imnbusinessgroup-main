@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, NavLink } from 'react-router-dom';
+// Pastikan uploadImage diimport dari service yang sudah diperbaiki di atas
 import { createCareer, getCareerById, updateCareer, uploadImage } from '../services/careerService';
 import { Career, CareerPayload } from '../types/career';
 import { AxiosError } from 'axios';
 import { 
-  FiArrowLeft, FiBriefcase, FiLink, FiType, FiFileText, 
+  FiArrowLeft, FiBriefcase, FiLink, FiType, 
   FiImage, FiUploadCloud, FiCheckCircle, FiAlertCircle, FiLoader, FiX 
 } from 'react-icons/fi';
 
@@ -12,17 +13,23 @@ const AdminCareerFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  // State Form
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [gFormLink, setGFormLink] = useState('');
+  
+  // State Gambar
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+
+  // State UI
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [formType, setFormType] = useState<'add' | 'edit'>('add');
 
+  // Load Data jika Edit Mode
   useEffect(() => {
     if (id) {
       setFormType('edit');
@@ -33,11 +40,12 @@ const AdminCareerFormPage: React.FC = () => {
           setTitle(career.title);
           setDescription(career.description);
           setGFormLink(career.gFormLink);
+          
           if (career.imageUrl) {
             setExistingImageUrl(career.imageUrl);
             setImagePreview(career.imageUrl);
           }
-        } catch (err: unknown) {
+        } catch (err) {
           setError('Gagal memuat data lowongan.');
         } finally {
           setLoading(false);
@@ -47,21 +55,32 @@ const AdminCareerFormPage: React.FC = () => {
     }
   }, [id]);
 
+  // Handle Pilih File Gambar
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Validasi ukuran (Max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        setError("Ukuran gambar terlalu besar (Maksimal 2MB)");
+        return;
+      }
+
       setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      setImagePreview(URL.createObjectURL(file)); 
       setExistingImageUrl(null); 
+      setError(null);
     }
   };
 
+  // Handle Hapus Gambar
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
     setExistingImageUrl(null);
   };
 
+  // Handle Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -71,20 +90,29 @@ const AdminCareerFormPage: React.FC = () => {
     let finalImageUrl: string | undefined = undefined;
 
     try {
+      // 1. Upload Gambar Dulu (Jika ada file baru)
       if (imageFile) {
-        setSuccessMessage('Sedang mengunggah gambar...');
+        // console.log("Mulai upload gambar..."); // Debugging
+        
+        // Panggil service uploadImage
         finalImageUrl = await uploadImage(imageFile);
+        
+        // console.log("Gambar berhasil diupload, URL:", finalImageUrl); // Debugging
       } else if (existingImageUrl) {
+        // Jika tidak ada upload baru, gunakan URL lama
         finalImageUrl = existingImageUrl;
       }
 
+      // 2. Siapkan Payload
       const careerData: CareerPayload = {
         title,
         description,
         gFormLink,
-        imageUrl: finalImageUrl || '',
+        // Pastikan field ini tidak undefined. Kirim string kosong jika tidak ada gambar.
+        imageUrl: finalImageUrl || '', 
       };
 
+      // 3. Kirim Data Lowongan ke Backend
       if (formType === 'add') {
         await createCareer(careerData);
         setSuccessMessage('Lowongan berhasil diterbitkan!');
@@ -93,12 +121,17 @@ const AdminCareerFormPage: React.FC = () => {
         setSuccessMessage('Perubahan berhasil disimpan!');
       }
 
+      // 4. Redirect kembali ke list
       setTimeout(() => navigate('/admin/careers'), 1500);
+
     } catch (err: unknown) {
-      let errorMessage = 'Terjadi kesalahan sistem.';
+      console.error("Submit Error:", err);
+      let errorMessage = 'Terjadi kesalahan sistem saat menyimpan data.';
+      
       if (err instanceof AxiosError) {
         errorMessage = err.response?.data?.message || err.message;
       }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -180,7 +213,7 @@ const AdminCareerFormPage: React.FC = () => {
                     />
                   </div>
                   <p className="mt-3 text-[11px] text-slate-400 leading-relaxed italic">
-                    *Pakai template https://forms.gle/, Kandidat akan diarahkan ke formulir ini setelah mengklik tombol "Lamar Sekarang" di website.
+                    *Pastikan link dimulai dengan https://forms.gle/
                   </p>
                 </div>
               </div>

@@ -1,55 +1,65 @@
-// controllers/uploadController.js
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
+// 1. Setup Path Directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Kita simpan di root folder backend/uploads agar mudah diakses
+const UPLOAD_DIR = path.join(__dirname, '..', 'uploads');
+
+// 2. Cek & Buat Folder jika belum ada
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  console.log(`Folder dibuat di: ${UPLOAD_DIR}`);
+}
+
+// 3. Konfigurasi Storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '..', 'public', 'uploads');
-    console.log('Multer destination path:', uploadPath);
-    cb(null, uploadPath);
+    cb(null, UPLOAD_DIR);
   },
   filename: (req, file, cb) => {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+    // Format: image-timestamp.ext (misal: image-1738291.jpg)
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
   },
 });
 
+// 4. Filter File (Hanya Gambar)
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
+  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (extname && mimetype) {
+    return cb(null, true);
   } else {
-    cb(new Error('Hanya file gambar yang diizinkan!'), false);
+    cb(new Error('Hanya file gambar (jpg, jpeg, png, gif, webp) yang diizinkan!'), false);
   }
 };
 
-const upload = multer({
+// 5. Inisialisasi Multer
+export const uploadMiddleware = multer({
   storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Limit 5MB
   fileFilter: fileFilter,
-  limits: { fileSize: 1024 * 1024 * 5 }, // 5MB
 });
 
-const uploadImage = (req, res) => {
-  upload.single('image')(req, res, (err) => {
-    if (err) {
-      if (err instanceof multer.MulterError) {
-        if (err.code === 'LIMIT_FILE_SIZE') {
-          return res.status(400).json({ message: 'Ukuran file terlalu besar. Maksimal 5MB.' });
-        }
-      }
-      console.error("Upload error:", err);
-      return res.status(400).json({ message: err.message || 'Gagal mengunggah gambar.' });
-    }
+// 6. Controller Handler (Dipanggil setelah uploadMiddleware sukses)
+export const handleUploadSuccess = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'Tidak ada file yang diunggah.' });
+  }
 
-    if (!req.file) {
-      return res.status(400).json({ message: 'Tidak ada file gambar yang diunggah.' });
-    }
+  // Buat URL lengkap agar frontend bisa langsung pakai
+  // req.protocol = http, req.get('host') = localhost:5000
+  const fullUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
-    const imageUrl = `/uploads/${req.file.filename}`;
-    res.status(200).json({ imageUrl });
+  res.status(200).json({
+    message: 'Upload berhasil',
+    imageUrl: fullUrl // Ini yang ditunggu frontend
   });
 };
-
-export { uploadImage };

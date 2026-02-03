@@ -3,7 +3,7 @@ import { getAllCareers } from '../services/careerService';
 import { Career } from '../types/career';
 import { AxiosError } from 'axios';
 import RevealOnScroll from '../components/RevealOnScroll';
-import { FiBriefcase, FiCalendar, FiArrowRight, FiX, FiMapPin } from 'react-icons/fi';
+import { FiBriefcase, FiCalendar, FiArrowRight, FiX } from 'react-icons/fi';
 
 const Careers: React.FC = () => {
   const [careers, setCareers] = useState<Career[]>([]);
@@ -12,7 +12,21 @@ const Careers: React.FC = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedCareer, setSelectedCareer] = useState<Career | null>(null);
 
-  const IMAGE_BASE_URL = 'https://imnbusinessgroup.co.id';
+  // --- PERBAIKAN LOGIKA IMAGE HELPER ---
+  // Fungsi ini otomatis mendeteksi apakah URL perlu prefix atau tidak
+  const getImageUrl = (url: string | undefined) => {
+    if (!url) return 'https://placehold.co/600x400?text=No+Image'; // Placeholder default
+    
+    // Jika URL sudah lengkap (dari cloudinary atau backend yang kirim full URL), pakai langsung
+    if (url.startsWith('http')) {
+      return url;
+    }
+    
+    // Jika URL relatif (misal: /uploads/abc.jpg), tambahkan base URL backend
+    // Sesuaikan BASE URL ini dengan alamat BACKEND Anda saat ini (Lokal atau Production)
+    const API_BASE_URL = 'http://localhost:5000'; // Ganti jika sudah deploy (misal: https://api.imnbusiness.com)
+    return `${API_BASE_URL}${url}`;
+  };
 
   useEffect(() => {
     const fetchCareers = async () => {
@@ -22,7 +36,6 @@ const Careers: React.FC = () => {
       } catch (err: unknown) {
         let errorMessage = 'Gagal mengambil data lowongan.';
         if (err instanceof AxiosError) {
-          // Jika masih 401, berikan pesan instruksi untuk cek backend
           if (err.response?.status === 401) {
             errorMessage = "Akses Publik belum diizinkan oleh server (401).";
           } else {
@@ -93,9 +106,13 @@ const Careers: React.FC = () => {
                 >
                   <div className="relative h-60 overflow-hidden bg-slate-100">
                     <img
-                      src={career.imageUrl ? `${IMAGE_BASE_URL}${career.imageUrl}` : 'https://placehold.co/600x400?text=IMN+Career'}
+                      // --- GUNAKAN HELPER DISINI ---
+                      src={getImageUrl(career.imageUrl)}
                       alt={career.title}
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=No+Image';
+                      }}
                     />
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-[10px] font-black uppercase tracking-widest rounded-lg text-blue-600 shadow-sm">
@@ -142,12 +159,16 @@ const Careers: React.FC = () => {
               <FiX size={24} />
             </button>
 
-            {/* Image Section */}
+            {/* Image Section Modal */}
             <div className="md:w-5/12 bg-slate-200 shrink-0 h-64 md:h-auto overflow-hidden">
               <img
-                src={selectedCareer.imageUrl ? `${IMAGE_BASE_URL}${selectedCareer.imageUrl}` : 'https://placehold.co/600x400?text=IMN+Career'}
+                // --- GUNAKAN HELPER DISINI JUGA ---
+                src={getImageUrl(selectedCareer.imageUrl)}
                 alt={selectedCareer.title}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=No+Image';
+                }}
               />
             </div>
 

@@ -13,7 +13,20 @@ const PersPage: React.FC = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedPressRelease, setSelectedPressRelease] = useState<PressRelease | null>(null);
 
-  const IMAGE_BASE_URL = 'https://imnbusinessgroup.co.id';
+  // --- PERBAIKAN LOGIKA GAMBAR ---
+  const getImageUrl = (url: string | undefined) => {
+    if (!url) return 'https://placehold.co/600x400?text=No+Image';
+    
+    // 1. Jika URL sudah lengkap (dari Cloudinary atau Backend yang kirim full URL)
+    if (url.startsWith('http')) {
+      return url;
+    }
+    
+    // 2. Jika URL relatif (misal: /uploads/abc.jpg), tambahkan Base URL Backend Anda
+    // Ganti 'http://localhost:5000' dengan domain backend production jika sudah deploy
+    const API_BASE_URL = 'http://localhost:5000'; 
+    return `${API_BASE_URL}${url}`;
+  };
 
   useEffect(() => {
     const fetchPressReleases = async () => {
@@ -23,7 +36,6 @@ const PersPage: React.FC = () => {
       } catch (err: unknown) {
         let errorMessage = 'Gagal mengambil data berita pers.';
         if (err instanceof AxiosError) {
-          // Menangani error unauthorized jika rute masih terproteksi di backend
           if (err.response?.status === 401) {
             errorMessage = "Akses publik belum diizinkan. Pastikan rute backend sudah dibuka.";
           } else {
@@ -101,11 +113,12 @@ const PersPage: React.FC = () => {
                   {/* Bagian Gambar */}
                   <div className="relative h-60 overflow-hidden bg-slate-100">
                     <img
-                      src={pressRelease.imageUrl ? `${IMAGE_BASE_URL}${pressRelease.imageUrl}` : 'https://placehold.co/600x400?text=IMN+News'}
+                      // --- GUNAKAN HELPER DISINI ---
+                      src={getImageUrl(pressRelease.imageUrl)}
                       alt={pressRelease.title}
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                       onError={(e) => {
-                        e.currentTarget.src = 'https://placehold.co/600x400?text=Image+Not+Found';
+                        (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/600x400?text=Image+Not+Found';
                       }}
                     />
                     <div className="absolute top-4 left-4">
@@ -158,9 +171,13 @@ const PersPage: React.FC = () => {
             {/* Bagian Gambar Modal */}
             <div className="md:w-5/12 bg-slate-100 shrink-0 h-64 md:h-auto overflow-hidden">
               <img
-                src={selectedPressRelease.imageUrl ? `${IMAGE_BASE_URL}${selectedPressRelease.imageUrl}` : 'https://placehold.co/600x400?text=IMN+News'}
+                // --- GUNAKAN HELPER DISINI JUGA ---
+                src={getImageUrl(selectedPressRelease.imageUrl)}
                 alt={selectedPressRelease.title}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/600x400?text=Image+Not+Found';
+                }}
               />
             </div>
 

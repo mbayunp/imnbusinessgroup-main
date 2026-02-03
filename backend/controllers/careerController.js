@@ -1,12 +1,13 @@
 // backend/controllers/careerController.js
-
-// PERBAIKAN: Import Career dari index.js (Central Export)
 import { Career } from '../models/index.js'; 
 
+// Get All
 const getAllCareers = async (req, res) => {
   try {
-    // Gunakan model Career langsung yang sudah di-import
-    const careers = await Career.findAll();
+    // Urutkan dari yang terbaru
+    const careers = await Career.findAll({
+      order: [['postedDate', 'DESC']]
+    });
     res.json(careers);
   } catch (error) {
     console.error('Error fetching careers:', error);
@@ -14,10 +15,10 @@ const getAllCareers = async (req, res) => {
   }
 };
 
+// Get By ID
 const getCareerById = async (req, res) => {
   try {
     const career = await Career.findByPk(req.params.id);
-
     if (career) {
       res.status(200).json(career);
     } else {
@@ -29,9 +30,10 @@ const getCareerById = async (req, res) => {
   }
 };
 
+// Create
 const createCareer = async (req, res) => {
+  // Ambil imageUrl dari body (dikirim frontend setelah upload sukses)
   const { title, description, gFormLink, imageUrl } = req.body;
-  // Pastikan req.user ada (Middleware auth harus jalan sebelumnya)
   const createdBy = req.user ? req.user.id : null; 
 
   try {
@@ -39,7 +41,7 @@ const createCareer = async (req, res) => {
       title,
       description,
       gFormLink,
-      imageUrl,
+      imageUrl, // Simpan URL gambar
       createdBy,
       postedDate: new Date()
     });
@@ -51,6 +53,7 @@ const createCareer = async (req, res) => {
   }
 };
 
+// Update
 const updateCareer = async (req, res) => {
   const { title, description, gFormLink, imageUrl } = req.body;
 
@@ -58,11 +61,11 @@ const updateCareer = async (req, res) => {
     const career = await Career.findByPk(req.params.id);
 
     if (career) {
-        await career.update({
+      await career.update({
         title: title !== undefined ? title : career.title,
         description: description !== undefined ? description : career.description,
         gFormLink: gFormLink !== undefined ? gFormLink : career.gFormLink,
-        imageUrl: imageUrl !== undefined ? imageUrl : career.imageUrl,
+        imageUrl: imageUrl !== undefined ? imageUrl : career.imageUrl, // Update hanya jika ada URL baru
       });
       res.status(200).json(career);
     } else {
@@ -74,10 +77,10 @@ const updateCareer = async (req, res) => {
   }
 };
 
+// Delete
 const deleteCareer = async (req, res) => {
   try {
     const career = await Career.findByPk(req.params.id);
-
     if (career) {
       await career.destroy(); 
       res.status(200).json({ message: 'Lowongan berhasil dihapus' });
@@ -90,12 +93,11 @@ const deleteCareer = async (req, res) => {
   }
 };
 
+// Stats
 const getCareerStats = async (req, res) => {
   try {
     const totalCareers = await Career.count(); 
-    // Jika nanti ada status 'active', filter di sini. Sementara disamakan dulu.
-    const activeCareers = totalCareers;
-
+    const activeCareers = totalCareers; // Bisa disesuaikan logikanya nanti
     res.status(200).json({ totalCareers, activeCareers });
   } catch (error) {
     console.error("Error fetching career stats:", error);

@@ -14,14 +14,17 @@ const AdminPressReleaseFormPage: React.FC = () => {
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  
+  // Image State
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  
+  // UI State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [formType, setFormType] = useState<'add' | 'edit'>('add');
-  const IMAGE_BASE_URL = 'https://imnbusinessgroup.co.id';
 
   useEffect(() => {
     if (id) {
@@ -34,7 +37,7 @@ const AdminPressReleaseFormPage: React.FC = () => {
           setContent(pressRelease.content);
           if (pressRelease.imageUrl) {
             setExistingImageUrl(pressRelease.imageUrl);
-            setImagePreview(`${IMAGE_BASE_URL}${pressRelease.imageUrl}`);
+            setImagePreview(pressRelease.imageUrl); // Gunakan URL langsung
           }
         } catch (err: unknown) {
           setError('Gagal memuat data rilis pers.');
@@ -49,9 +52,16 @@ const AdminPressReleaseFormPage: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      if (file.size > 2 * 1024 * 1024) {
+        setError("Ukuran gambar terlalu besar (Max 2MB)");
+        return;
+      }
+
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
       setExistingImageUrl(null);
+      setError(null);
     }
   };
 
@@ -70,19 +80,22 @@ const AdminPressReleaseFormPage: React.FC = () => {
     let finalImageUrl: string | undefined = undefined;
 
     try {
+      // 1. Upload Gambar
       if (imageFile) {
-        setSuccessMessage('Mengunggah gambar...');
+        // setSuccessMessage('Mengunggah gambar...');
         finalImageUrl = await uploadImage(imageFile);
       } else if (existingImageUrl) {
         finalImageUrl = existingImageUrl;
       }
 
+      // 2. Siapkan Payload
       const pressReleaseData: PressReleasePayload = {
         title,
         content,
         imageUrl: finalImageUrl || '',
       };
 
+      // 3. Kirim ke Backend
       if (formType === 'add') {
         await createPressRelease(pressReleaseData);
         setSuccessMessage('Berita rilis pers berhasil diterbitkan!');
@@ -91,6 +104,7 @@ const AdminPressReleaseFormPage: React.FC = () => {
         setSuccessMessage('Perubahan berita berhasil disimpan!');
       }
 
+      // 4. Redirect
       setTimeout(() => navigate('/admin/press-releases'), 1500);
     } catch (err: unknown) {
       let errorMessage = 'Terjadi kesalahan sistem.';
@@ -123,7 +137,7 @@ const AdminPressReleaseFormPage: React.FC = () => {
       {/* FORM BODY */}
       <div className="max-w-5xl mx-auto w-full px-6 py-10 flex-1">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+           
           {/* LEFT COLUMN: Main Content */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
@@ -157,6 +171,7 @@ const AdminPressReleaseFormPage: React.FC = () => {
 
           {/* RIGHT COLUMN: Media & Action */}
           <div className="lg:col-span-1 space-y-6">
+            
             {/* Image Upload Card */}
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
               <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center uppercase tracking-wider">
@@ -170,7 +185,7 @@ const AdminPressReleaseFormPage: React.FC = () => {
                     <button 
                       type="button"
                       onClick={removeImage}
-                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-black rounded-lg hover:bg-red-600 transition-colors shadow-lg"
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-lg"
                     >
                       <FiX />
                     </button>
@@ -204,7 +219,7 @@ const AdminPressReleaseFormPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-4 rounded-2xl font-black text-indigo-600 tracking-widest uppercase text-xs transition-all shadow-lg flex items-center justify-center active:scale-95 ${
+                className={`w-full py-4 rounded-2xl font-black text-white tracking-widest uppercase text-xs transition-all shadow-lg flex items-center justify-center active:scale-95 ${
                   loading ? 'bg-slate-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100'
                 }`}
               >

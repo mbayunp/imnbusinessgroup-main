@@ -4,7 +4,7 @@ import { getAllPressReleases, deletePressRelease } from '../services/pressReleas
 import { AxiosError } from 'axios';
 import { 
   FiPlus, FiEdit2, FiTrash2, FiArrowLeft, 
-  FiFileText, FiCalendar, FiAlertCircle, FiCheckCircle, FiLoader, FiSearch
+  FiFileText, FiCalendar, FiAlertCircle, FiCheckCircle, FiLoader, FiSearch, FiImage
 } from 'react-icons/fi';
 import { PressRelease } from '../types/pressRelease';
 
@@ -72,7 +72,6 @@ const AdminPressReleaseListPage: React.FC = () => {
     }
   };
 
-  // Logic filter pencarian sederhana
   const filteredReleases = pressReleases.filter(release => 
     release.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -81,10 +80,8 @@ const AdminPressReleaseListPage: React.FC = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f8fafc]">
         <div className="flex flex-col items-center">
-          <div className="relative">
-            <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-          </div>
-          <p className="mt-4 text-slate-500 font-semibold tracking-wide animate-pulse">Menyingkronkan Berita...</p>
+          <FiLoader className="animate-spin text-indigo-600 text-4xl mb-4" />
+          <p className="text-slate-500 font-semibold tracking-wide animate-pulse">Menyingkronkan Berita...</p>
         </div>
       </div>
     );
@@ -92,7 +89,7 @@ const AdminPressReleaseListPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-12 font-sans selection:bg-indigo-100 selection:text-indigo-700">
-      {/* HEADER SECTION - Glassmorphism style */}
+      {/* HEADER */}
       <div className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 transition-all">
         <div className="max-w-6xl mx-auto px-6 py-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -111,7 +108,6 @@ const AdminPressReleaseListPage: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-3">
-               {/* Search Bar - Professional addition */}
                <div className="relative hidden lg:block">
                   <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input 
@@ -134,26 +130,22 @@ const AdminPressReleaseListPage: React.FC = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 mt-8">
-        {/* MESSAGES / TOASTS */}
+        {/* TOASTS */}
         {message && (
           <div className="mb-6 flex items-center p-4 bg-white border-l-4 border-emerald-500 shadow-sm rounded-r-2xl animate-in slide-in-from-right duration-500">
-            <div className="bg-emerald-100 p-2 rounded-lg mr-4">
-               <FiCheckCircle className="text-emerald-600 text-xl" />
-            </div>
+            <div className="bg-emerald-100 p-2 rounded-lg mr-4"><FiCheckCircle className="text-emerald-600 text-xl" /></div>
             <span className="font-bold text-slate-700">{message}</span>
           </div>
         )}
 
         {error && (
           <div className="mb-6 flex items-center p-4 bg-white border-l-4 border-red-500 shadow-sm rounded-r-2xl">
-            <div className="bg-red-100 p-2 rounded-lg mr-4">
-               <FiAlertCircle className="text-red-600 text-xl" />
-            </div>
+            <div className="bg-red-100 p-2 rounded-lg mr-4"><FiAlertCircle className="text-red-600 text-xl" /></div>
             <span className="font-bold text-slate-700">{error}</span>
           </div>
         )}
 
-        {/* DATA TABLE CARD */}
+        {/* TABLE */}
         <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden transition-all hover:shadow-md">
           {filteredReleases.length === 0 ? (
             <div className="py-32 text-center">
@@ -168,6 +160,7 @@ const AdminPressReleaseListPage: React.FC = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black border-b border-slate-100">
+                    <th className="px-10 py-6">Visual</th> {/* KOLOM VISUAL */}
                     <th className="px-10 py-6">Informasi Berita</th>
                     <th className="px-10 py-6">Status & Waktu</th>
                     <th className="px-10 py-6 text-right">Manajemen</th>
@@ -176,33 +169,45 @@ const AdminPressReleaseListPage: React.FC = () => {
                 <tbody className="divide-y divide-slate-50">
                   {filteredReleases.map((release) => (
                     <tr key={release.id} className="group hover:bg-slate-50/80 transition-all duration-300">
+                      
+                      {/* KOLOM THUMBNAIL */}
+                      <td className="px-10 py-7 w-32">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm relative">
+                          {release.imageUrl ? (
+                            <img 
+                              src={release.imageUrl} 
+                              alt="Thumbnail" 
+                              className="w-full h-full object-cover"
+                              onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=No+Image'; }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-300">
+                              <FiImage size={24} />
+                            </div>
+                          )}
+                        </div>
+                      </td>
+
                       <td className="px-10 py-7">
-                        <div className="flex items-center gap-4">
-                           <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
-                              <FiFileText className="text-lg" />
-                           </div>
-                           <div className="max-w-md">
-                              <div className="font-bold text-slate-800 text-lg group-hover:text-indigo-700 transition-colors leading-tight mb-1 truncate">
-                                {release.title}
-                              </div>
-                              <div className="flex items-center text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                                Publikasi Resmi
-                              </div>
-                           </div>
+                        <div className="max-w-md">
+                          <div className="font-bold text-slate-800 text-lg group-hover:text-indigo-700 transition-colors leading-tight mb-1 truncate">
+                            {release.title}
+                          </div>
+                          <div className="flex items-center text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                            Publikasi Resmi
+                          </div>
                         </div>
                       </td>
                       <td className="px-10 py-7">
                         <div className="flex flex-col gap-2">
                            <div className="flex items-center text-slate-500 text-sm font-semibold">
-                              <FiCalendar className="mr-2 text-slate-300" />
-                              {new Date(release.postedDate).toLocaleDateString('id-ID', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
+                             <FiCalendar className="mr-2 text-slate-300" />
+                             {new Date(release.postedDate).toLocaleDateString('id-ID', {
+                               day: 'numeric', month: 'short', year: 'numeric'
+                             })}
                            </div>
                            <span className="w-fit px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-600 border border-emerald-200 uppercase tracking-tighter">
-                              Published
+                             Published
                            </span>
                         </div>
                       </td>
@@ -233,7 +238,7 @@ const AdminPressReleaseListPage: React.FC = () => {
         </div>
       </div>
 
-      {/* MODERN DELETE MODAL - Enhanced Visual */}
+      {/* DELETE MODAL */}
       {showDeleteConfirmModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300 px-6">
           <div className="bg-white rounded-[2.5rem] p-10 shadow-2xl max-w-sm w-full transform animate-in zoom-in-95 duration-200 border border-white">
@@ -245,18 +250,8 @@ const AdminPressReleaseListPage: React.FC = () => {
               Tindakan ini permanen. Data berita <span className="font-bold text-slate-800 tracking-tight italic">"{searchTerm || 'ini'}"</span> tidak dapat dipulihkan kembali.
             </p>
             <div className="grid grid-cols-2 gap-4">
-               <button
-                onClick={cancelDelete}
-                className="py-4 rounded-2xl bg-slate-100 text-slate-500 font-bold hover:bg-slate-200 transition-all active:scale-95 text-sm"
-              >
-                Batal
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="py-4 rounded-2xl bg-red-600 text-white font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-200 active:scale-95 text-sm"
-              >
-                Ya, Hapus
-              </button>
+               <button onClick={cancelDelete} className="py-4 rounded-2xl bg-slate-100 text-slate-500 font-bold hover:bg-slate-200 transition-all active:scale-95 text-sm">Batal</button>
+               <button onClick={confirmDelete} className="py-4 rounded-2xl bg-red-600 text-white font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-200 active:scale-95 text-sm">Ya, Hapus</button>
             </div>
           </div>
         </div>
