@@ -9,10 +9,8 @@ import { protect } from '../middleware/authMiddleware.js'; // Middleware login
 
 const router = express.Router();
 
-// Public: Siapapun bisa kirim pesan
 router.post('/', createContactMessage);
 
-// Admin Only: Harus login untuk lihat dan hapus pesan
 router.get('/', protect, getContactMessages);
 router.delete('/:id', protect, deleteContactMessage);
 

@@ -3,8 +3,6 @@ import { uploadMiddleware, handleUploadSuccess } from '../controllers/uploadCont
 
 const router = express.Router();
 
-// Endpoint: POST /api/upload
-// Urutan: Middleware Multer dulu -> Baru Handler JSON
 router.post('/', uploadMiddleware.single('image'), handleUploadSuccess);
 
 export default router;

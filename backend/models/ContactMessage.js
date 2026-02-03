@@ -21,10 +21,9 @@ export const initContactModel = (sequelize) => {
         isEmail: true,
       }
     },
-    // TAMBAHKAN KOLOM PHONE DI SINI
     phone: {
       type: DataTypes.STRING,
-      allowNull: true, // Boleh kosong jika user tidak mengisi
+      allowNull: true,
     },
     subject: {
       type: DataTypes.STRING,

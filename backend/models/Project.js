@@ -3,7 +3,6 @@ import { DataTypes, Model } from 'sequelize';
 
 class Project extends Model {}
 
-// PERBAIKAN: Gunakan 'export const' agar bisa dibaca oleh initModels.js
 export const initProjectModel = (sequelize) => {
   Project.init({
     id: {
@@ -30,7 +29,6 @@ export const initProjectModel = (sequelize) => {
         isUrl: true
       }
     },
-    // Field untuk relasi dengan User (siapa yang upload project ini)
     createdBy: {
       type: DataTypes.INTEGER,
       allowNull: false,

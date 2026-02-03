@@ -16,11 +16,9 @@ const router = express.Router();
 // --- PUBLIC ROUTES ---
 router.get('/', getPressReleases);
 
-// --- PROTECTED ROUTES ---
-// Endpoint STATS harus SEBELUM endpoint ID
 router.get('/stats', protect, authorizeRoles(['admin', 'hr']), getPressReleaseStats);
 
-router.get('/:id', getPressReleaseById); // Route ID taruh setelah stats
+router.get('/:id', getPressReleaseById);
 
 router.post('/', protect, authorizeRoles(['admin', 'hr']), createPressRelease);
 router.put('/:id', protect, authorizeRoles(['admin', 'hr']), updatePressRelease);

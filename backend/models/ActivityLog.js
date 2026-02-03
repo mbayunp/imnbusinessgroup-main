@@ -14,7 +14,6 @@ export const initActivityLogModel = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    // Opsional: Simpan username sebagai string snapshot (berjaga jika user dihapus)
     username: {
       type: DataTypes.STRING,
       allowNull: true
@@ -27,13 +26,11 @@ export const initActivityLogModel = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true
     },
-    // PERBAIKAN UTAMA: Definisi Explicit Foreign Key
-    // Nama kolom ini harus sama dengan foreignKey di index.js ('user')
     user: {
-      type: DataTypes.INTEGER, // Wajib INTEGER karena User.id adalah INTEGER
+      type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: 'users', // Nama tabel referensi (harus sama dengan tableName di User.js)
+        model: 'users',
         key: 'id'
       },
       onUpdate: 'CASCADE',

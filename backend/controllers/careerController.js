@@ -32,7 +32,6 @@ const getCareerById = async (req, res) => {
 
 // Create
 const createCareer = async (req, res) => {
-  // Ambil imageUrl dari body (dikirim frontend setelah upload sukses)
   const { title, description, gFormLink, imageUrl } = req.body;
   const createdBy = req.user ? req.user.id : null; 
 

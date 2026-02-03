@@ -1,10 +1,8 @@
 // backend/controllers/authController.js
 
-// 1. FIX IMPORT: Ambil User dari index.js, bukan langsung dari file User.js
 import { User } from '../models/index.js';
 import jwt from 'jsonwebtoken';
 
-// Fungsi bantu buat cookie & token
 const generateTokenAndSetCookie = (res, id, role) => {
   const token = jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
@@ -12,7 +10,7 @@ const generateTokenAndSetCookie = (res, id, role) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 60 * 60 * 1000, // 1 jam
+    maxAge: 60 * 60 * 1000,
   });
 
   return token;
@@ -26,23 +24,20 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'All fields are required.' });
     }
 
-    // Cek apakah user sudah ada
     const userExists = await User.findOne({ where: { username } });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Buat User baru (Password akan di-hash otomatis oleh hooks di User.js)
     const user = await User.create({ username, password, role });
 
-    // Buat token
     const token = generateTokenAndSetCookie(res, user.id, user.role);
 
     res.status(201).json({
       id: user.id,
       username: user.username,
       role: user.role,
-      token: token, // Sertakan token di response JSON juga
+      token: token,
       message: "Registration successful"
     });
 
@@ -58,7 +53,6 @@ export const loginUser = async (req, res) => {
 
     const user = await User.findOne({ where: { username } });
 
-    // Gunakan method matchPassword yang sudah kita buat di User Model
     if (user && (await user.matchPassword(password))) {
       
       const token = generateTokenAndSetCookie(res, user.id, user.role);
@@ -100,9 +94,8 @@ export const getMe = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    // Ambil data user fresh dari DB (opsional, tapi disarankan)
     const user = await User.findByPk(req.user.id, {
-        attributes: { exclude: ['password'] } // Jangan kirim password balik
+        attributes: { exclude: ['password'] }
     });
 
     if (!user) {

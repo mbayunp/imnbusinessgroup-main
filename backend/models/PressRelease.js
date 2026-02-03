@@ -18,17 +18,14 @@ export const initPressReleaseModel = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    // Kita gunakan 'imageUrl' agar konsisten dengan Career
     imageUrl: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    // Kolom ini yang menyebabkan error sebelumnya (sekarang kita definisikan)
     postedDate: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
-    // Definisi Relasi User (Foreign Key)
     createdBy: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -41,7 +38,7 @@ export const initPressReleaseModel = (sequelize) => {
     }
   }, {
     sequelize,
-    modelName: 'PressRelease', // Penting: Nama Model dipakai di Controller
+    modelName: 'PressRelease',
     tableName: 'press_releases',
     timestamps: true,
   });

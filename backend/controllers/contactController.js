@@ -1,7 +1,6 @@
 // backend/controllers/contactController.js
 import { ContactMessage } from '../models/index.js';
 
-// 1. Kirim Pesan (Public)
 export const createContactMessage = async (req, res) => {
   try {
     const { firstName, lastName, email, phone, subject, message } = req.body;
@@ -22,7 +21,6 @@ export const createContactMessage = async (req, res) => {
   }
 };
 
-// 2. Baca Pesan (Admin)
 export const getContactMessages = async (req, res) => {
   try {
     const messages = await ContactMessage.findAll({
@@ -34,7 +32,6 @@ export const getContactMessages = async (req, res) => {
   }
 };
 
-// 3. HAPUS PESAN (INI YANG TADI ERROR/HILANG)
 export const deleteContactMessage = async (req, res) => {
   try {
     const { id } = req.params;

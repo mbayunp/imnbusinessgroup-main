@@ -44,12 +44,12 @@ export const initUserModel = (sequelize) => {
       {
         unique: true,
         fields: ['username'],
-        name: 'users_username_unique_idx' // Nama ini tidak akan berubah-ubah
+        name: 'users_username_unique_idx'
       },
       {
         unique: true,
         fields: ['email'],
-        name: 'users_email_unique_idx' // Nama ini tidak akan berubah-ubah
+        name: 'users_email_unique_idx'
       }
     ],
 

@@ -28,18 +28,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// 2. Cek & Buat Folder Uploads Otomatis
-// Ini penting agar server tidak error saat upload pertama kali
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
   console.log('📁 Folder uploads berhasil dibuat otomatis.');
 }
 
-// 3. Middleware Global
 app.use(cors({
-  origin: 'http://localhost:5173', // Sesuaikan dengan port frontend Anda
-  credentials: true, // Izinkan cookie
+  origin: 'http://localhost:5173',
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -48,41 +45,29 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// 4. Static Files (PENTING UNTUK GAMBAR)
-// Membuat folder uploads bisa diakses via URL: http://localhost:5000/uploads/namafile.jpg
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// 5. Test Route
 app.get('/', (req, res) => {
   res.send('🎉 API is running...');
 });
 
-// 6. Main Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/upload', uploadRoutes); // Route upload (pastikan ini ada)
+app.use('/api/upload', uploadRoutes);
 
-// Route Career & Press Release
-// (Middleware Auth dipasang spesifik di dalam file router masing-masing)
-app.use('/api/careers', careerRoutes);            
+app.use('/api/careers', careerRoutes);
 app.use('/api/press-releases', pressReleaseRoutes); 
 app.use('/api/contact', contactRoutes); 
 
-// 7. Error Middleware (Wajib di paling bawah)
 app.use(notFound);
 app.use(errorHandler);
 
-// 8. Server Start & Database Sync
 const startServer = async () => {
   try {
-    // Cek koneksi DB
     await sequelize.authenticate();
     console.log('✅ Database connected');
 
-    // Init Model Relasi
     initModels(sequelize);
 
-    // Sync Database
-    // alter: false -> Aman, tidak merusak struktur tabel/index yang sudah diperbaiki
     await sequelize.sync({ alter: true }); 
     console.log('✅ Database Synced');
 

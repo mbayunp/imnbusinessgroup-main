@@ -1,9 +1,13 @@
-export interface UserProfile {
-  _id: string;
+// src/types/user.ts
+export interface User {
+  id: number;
   username: string;
-  role: 'admin' | 'hr' | string;
+  email: string;
+  role: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface AuthResponse extends UserProfile {
+export interface AuthResponse extends User {
   token: string;
 }

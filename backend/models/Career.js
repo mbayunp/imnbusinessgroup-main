@@ -30,12 +30,11 @@ export const initCareerModel = (sequelize) => {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
-    // PERBAIKAN: Definisi Foreign Key Explicit
     createdBy: {
-      type: DataTypes.INTEGER, // Wajib INTEGER agar cocok dengan User.id
+      type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: 'users', // Nama tabel referensi
+        model: 'users',
         key: 'id'
       },
       onUpdate: 'CASCADE',

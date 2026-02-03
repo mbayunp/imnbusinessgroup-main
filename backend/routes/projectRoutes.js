@@ -2,11 +2,11 @@
 import express from 'express';
 import { getProjects, createProject } from '../controllers/projectController.js';
 import { protect } from '../middleware/authMiddleware.js';
-import { authorizeRoles } from '../middleware/authorizeMiddleware.js'; // Pastikan path ini benar
+import { authorizeRoles } from '../middleware/authorizeMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', protect, authorizeRoles(['admin', 'hr']), getProjects); // Contoh: hanya admin/hr yang bisa melihat
-router.post('/', protect, authorizeRoles(['admin']), createProject); // Contoh: hanya admin yang bisa membuat
+router.get('/', protect, authorizeRoles(['admin', 'hr']), getProjects);
+router.post('/', protect, authorizeRoles(['admin']), createProject);
 
 export default router;
