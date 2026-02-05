@@ -19,7 +19,7 @@ import AdminCareerFormPage from './pages/AdminCareerFormPage';
 import AdminPressReleaseListPage from './pages/AdminPressReleaseListPage';
 import AdminPressReleaseFormPage from './pages/AdminPressReleaseFormPage';
 
-import AdminRoute from './components/AdminRoute';
+import AdminRoute from './routes/AdminRoute';
 import Preloader from './components/Preloader';
 
 // --- PERBAIKAN UTAMA 1: Import AuthProvider ---
