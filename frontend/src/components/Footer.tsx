@@ -1,83 +1,139 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiMail, FiPhone, FiMapPin, FiInstagram, FiFacebook, FiLinkedin } from 'react-icons/fi';
+import { FiMail, FiPhone, FiMapPin, FiInstagram, FiFacebook, FiLinkedin, FiArrowRight } from 'react-icons/fi';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-20 pb-10 font-sans">
-      <div className="max-w-7xl mx-auto px-6">
+    <footer className="bg-slate-950 text-slate-300 pt-20 pb-8 font-sans border-t border-slate-900">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
           
-          {/* Brand Column */}
-          <div className="md:col-span-4 space-y-6">
-            <img src="/logo.png" alt="IMN Business Group Logo" className="h-12 brightness-0 invert" /> 
-            <p className="text-sm leading-relaxed max-w-sm text-slate-400">
-              IMN Business Group berkomitmen untuk mendorong pertumbuhan ekonomi nasional melalui inovasi berkelanjutan di berbagai sektor industri.
+          {/* Brand Column (Span 4) */}
+          <div className="lg:col-span-4 space-y-6">
+            <Link to="/" className="block">
+                {/* Pastikan file logo.png ada di public folder */}
+                <img src="/logo.png" alt="IMN Business Group Logo" className="h-10 brightness-0 invert opacity-90 hover:opacity-100 transition-opacity" /> 
+            </Link>
+            <p className="text-sm leading-relaxed text-slate-400 max-w-sm">
+              IMN Business Group berkomitmen mendorong pertumbuhan ekonomi nasional melalui inovasi berkelanjutan dan solusi terintegrasi di berbagai sektor industri strategis.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="p-2 bg-slate-800/50 rounded-lg hover:bg-blue-600 transition-all"><FiInstagram /></a>
-              <a href="#" className="p-2 bg-slate-800/50 rounded-lg hover:bg-blue-600 transition-all"><FiFacebook /></a>
-              <a href="#" className="p-2 bg-slate-800/50 rounded-lg hover:bg-blue-600 transition-all"><FiLinkedin /></a>
+            
+            {/* Social Media Buttons */}
+            <div className="flex space-x-3 pt-2">
+              {[
+                { icon: <FiInstagram />, link: "#" },
+                { icon: <FiFacebook />, link: "#" },
+                { icon: <FiLinkedin />, link: "#" }
+              ].map((social, index) => (
+                <a 
+                    key={index} 
+                    href={social.link} 
+                    className="h-10 w-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:bg-blue-600 hover:text-white transition-all duration-300 hover:-translate-y-1 shadow-sm border border-slate-800"
+                >
+                    {social.icon}
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* About Us Column */}
-          <div className="md:col-span-2">
-            <h3 className="text-white font-black uppercase tracking-widest text-xs mb-6">Perusahaan</h3>
-            <ul className="space-y-4 text-sm font-medium">
-              <li><Link to="/tentang" className="hover:text-blue-400 transition-colors">Tentang Kami</Link></li>
-              <li><Link to="/kegiatan" className="hover:text-blue-400 transition-colors">Kegiatan Kami</Link></li>
-              <li><Link to="/careers" className="hover:text-blue-400 transition-colors">Karir</Link></li>
-              <li><Link to="/press-releases" className="hover:text-blue-400 transition-colors">Rilis Pers</Link></li>
+          {/* Links Column 1 (Span 2) */}
+          <div className="lg:col-span-2">
+            <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 relative inline-block">
+                Perusahaan
+                <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-blue-600 rounded-full"></span>
+            </h3>
+            <ul className="space-y-3 text-sm">
+              {[
+                { name: 'Tentang Kami', path: '/tentang' },
+                { name: 'Kegiatan', path: '/kegiatan' },
+                { name: 'Karir', path: '/careers' },
+                { name: 'Rilis Pers', path: '/press-releases' }
+              ].map((item, idx) => (
+                <li key={idx}>
+                  <Link to={item.path} className="text-slate-400 hover:text-blue-500 transition-all duration-300 flex items-center group">
+                    <span className="w-0 group-hover:w-2 h-px bg-blue-500 mr-0 group-hover:mr-2 transition-all duration-300"></span>
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Services Column */}
-          <div className="md:col-span-3">
-            <h3 className="text-white font-black uppercase tracking-widest text-xs mb-6">Unit Bisnis</h3>
-            <ul className="space-y-4 text-sm font-medium">
-              <li className="hover:text-blue-400 cursor-default transition-colors">Agrobisnis & Peternakan</li>
-              <li className="hover:text-blue-400 cursor-default transition-colors">Jasa Pengadaan Barang</li>
-              <li className="hover:text-blue-400 cursor-default transition-colors">Manajemen Aqiqah</li>
-              <li className="hover:text-blue-400 cursor-default transition-colors">IT & Creative Solutions</li>
+          {/* Links Column 2 (Span 3) */}
+          <div className="lg:col-span-3">
+            <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 relative inline-block">
+                Layanan
+                <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-blue-600 rounded-full"></span>
+            </h3>
+            <ul className="space-y-3 text-sm">
+              {[
+                'Agrobisnis & Peternakan',
+                'Jasa Pengadaan Barang',
+                'Manajemen Aqiqah',
+                'IT & Creative Solutions'
+              ].map((service, idx) => (
+                <li key={idx} className="text-slate-400 hover:text-blue-500 cursor-default transition-colors flex items-start">
+                   {service}
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Contact Column */}
-          <div className="md:col-span-3">
-            <h3 className="text-white font-black uppercase tracking-widest text-xs mb-6">Kontak</h3>
-            <ul className="space-y-4 text-sm font-medium">
+          {/* Newsletter / Contact Column (Span 3) */}
+          <div className="lg:col-span-3">
+            <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 relative inline-block">
+                Tetap Terhubung
+                <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-blue-600 rounded-full"></span>
+            </h3>
+            
+            {/* Address Info */}
+            <ul className="space-y-4 text-sm mb-6">
               <li className="flex items-start gap-3">
                 <FiMapPin className="text-blue-500 mt-1 shrink-0" />
-                <span>Jl. Cipondoh Girang, RT.06/RW.12, Cinunuk, Cileunyi, Bandung 40624</span>
+                <span className="text-slate-400 leading-snug">Jl. Cipondoh Girang, RT.06/RW.12, Cinunuk, Cileunyi, Bandung 40624</span>
               </li>
               <li className="flex items-center gap-3">
                 <FiPhone className="text-blue-500 shrink-0" />
-                <span>+62 21 1234 5678</span>
+                <span className="text-slate-400">+62 21 1234 5678</span>
               </li>
               <li className="flex items-center gap-3">
                 <FiMail className="text-blue-500 shrink-0" />
-                <span>info@imnbusinessgroup.com</span>
+                <span className="text-slate-400">info@imnbusinessgroup.com</span>
               </li>
             </ul>
+
+            {/* Newsletter Input Mockup */}
+            <div className="relative">
+                <input 
+                    type="email" 
+                    placeholder="Email Anda" 
+                    className="w-full bg-slate-900 border border-slate-800 text-slate-300 text-sm rounded-lg px-4 py-3 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-all placeholder:text-slate-600"
+                />
+                <button className="absolute right-1.5 top-1.5 bg-blue-600 text-white p-1.5 rounded-md hover:bg-blue-500 transition-colors">
+                    <FiArrowRight />
+                </button>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom Section */}
+        <div className="pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-slate-500 text-center md:text-left">
+            © {currentYear} <span className="font-bold text-slate-300">IMN Business Group</span>. Seluruh Hak Cipta Dilindungi.
+          </p>
+          
+          <div className="flex gap-6 text-xs font-medium text-slate-500 uppercase tracking-wide">
+            <Link to="/kebijakan-privasi" className="hover:text-blue-400 transition-colors">Privacy Policy</Link>
+            <Link to="/contact" className="hover:text-blue-400 transition-colors">Terms of Service</Link>
+            <Link to="/contact" className="hover:text-blue-400 transition-colors">Support</Link>
           </div>
         </div>
 
-        {/* Bottom Section - GARIS DIHAPUS */}
-        <div className="mt-20 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-xs font-bold uppercase tracking-tighter text-slate-500">
-            © {currentYear} <span className="text-slate-400">IMN Business Group</span>. Seluruh Hak Cipta Dilindungi.
-          </p>
-          
-          <div className="flex gap-8 text-[10px] font-black uppercase tracking-[0.2em]">
-            <Link to="/kebijakan-privasi" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link to="/contact" className="hover:text-white transition-colors">Support</Link>
-          </div>
-        </div>
       </div>
     </footer>
   );
